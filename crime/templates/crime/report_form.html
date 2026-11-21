@@ -1,0 +1,130 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Submit Crime Report</title>
+
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+</head>
+
+<body class="bg-slate-100 min-h-screen">
+
+    <header class="bg-slate-900 text-white">
+        <div class="max-w-7xl mx-auto px-6 py-5">
+            <h1 class="text-2xl font-bold">
+                AI Crime Report Analyzer
+            </h1>
+        </div>
+    </header>
+
+
+    <main class="max-w-3xl mx-auto px-6 py-10">
+
+        <div class="bg-white rounded-xl shadow-md p-8">
+
+            <h2 class="text-3xl font-bold text-slate-900 mb-2">
+                Submit Crime Report
+            </h2>
+
+            <p class="text-slate-600 mb-8">
+                Enter the details of the crime report for analysis.
+            </p>
+
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+
+                <!-- Crime Title -->
+                <div class="mb-5">
+
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">
+                        Crime Title
+                    </label>
+
+                    <input
+                        type="text"
+                        name="title"
+                        required
+                        class="w-full border border-slate-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-slate-500"
+                        placeholder="e.g. Mobile Theft"
+                    >
+
+                </div>
+
+
+                <!-- Crime Description -->
+                <div class="mb-5">
+
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">
+                        Crime Description
+                    </label>
+
+                    <textarea
+                        name="description"
+                        rows="6"
+                        required
+                        class="w-full border border-slate-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-slate-500"
+                        placeholder="Describe the crime incident in detail..."
+                    ></textarea>
+
+                </div>
+
+
+                <!-- Location -->
+                <div class="mb-5">
+
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">
+                        Location
+                    </label>
+
+                    <input
+                        type="text"
+                        name="location"
+                        required
+                        class="w-full border border-slate-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-slate-500"
+                        placeholder="e.g. Mumbai"
+                    >
+
+                </div>
+
+
+                <!-- Date Reported -->
+                <div class="mb-7">
+
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">
+                        Date Reported
+                    </label>
+
+                    <input
+                        type="date"
+                        name="date_reported"
+                        required
+                        class="w-full border border-slate-300 rounded-lg px-4 py-3"
+                    >
+
+                </div>
+
+
+                <!-- Submit -->
+                <button
+                    type="submit"
+                    class="w-full bg-slate-900 text-white py-3 rounded-lg font-semibold hover:bg-slate-700 transition"
+                >
+                    Submit Report
+                </button>
+
+            </form>
+
+        </div>
+
+    </main>
+
+</body>
+</html>

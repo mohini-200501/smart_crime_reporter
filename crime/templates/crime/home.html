@@ -1,0 +1,123 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Crime Report Analyzer</title>
+
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+</head>
+
+<body class="bg-slate-100 min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-slate-900 text-white">
+        <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
+
+            <h1 class="text-2xl font-bold">
+                AI Crime Report Analyzer
+            </h1>
+
+            <nav class="space-x-6">
+                <a href="{% url 'home' %}" class="hover:text-slate-300">
+                    Home
+                </a>
+
+                <a href="#" class="hover:text-slate-300">
+                    Reports
+                </a>
+
+                <a href="#" class="hover:text-slate-300">
+                    Cases
+                </a>
+            </nav>
+
+        </div>
+    </header>
+
+
+    <!-- Hero Section -->
+    <main>
+
+        <section class="max-w-7xl mx-auto px-6 py-20">
+
+            <div class="max-w-3xl">
+
+                <p class="text-slate-600 font-semibold mb-3">
+                    AI-Powered Crime Analysis
+                </p>
+
+                <h2 class="text-5xl font-bold text-slate-900 leading-tight mb-6">
+                    Analyze Crime Reports
+                    <br>
+                    Find Similar Cases
+                </h2>
+
+                <p class="text-lg text-slate-600 mb-8">
+                    Analyze crime reports using AI and identify similar
+                    previous cases to support investigation and case analysis.
+                </p>
+
+                <!-- Analyze Crime Report Button -->
+                <a href="{% url 'report_form' %}"
+                   class="inline-block bg-slate-900 text-white px-6 py-3 rounded-lg font-semibold hover:bg-slate-700 transition">
+                    Analyze Crime Report
+                </a>
+
+            </div>
+
+        </section>
+
+
+        <!-- Features -->
+        <section class="max-w-7xl mx-auto px-6 pb-20">
+
+            <div class="grid md:grid-cols-3 gap-6">
+
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">
+                        Crime Reports
+                    </h3>
+
+                    <p class="text-slate-600">
+                        Submit and store important crime report details
+                        securely for further analysis.
+                    </p>
+                </div>
+
+
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">
+                        AI Analysis
+                    </h3>
+
+                    <p class="text-slate-600">
+                        Use a pre-trained AI model to analyze the
+                        submitted crime report.
+                    </p>
+                </div>
+
+
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">
+                        Similar Cases
+                    </h3>
+
+                    <p class="text-slate-600">
+                        Find previous cases with similar details to
+                        support investigation.
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+</html>

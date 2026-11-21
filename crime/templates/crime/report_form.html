@@ -1,4 +1,3 @@
-
 {% load static %}
 
 <!DOCTYPE html>
@@ -6,125 +5,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Submit Crime Report</title>
-
     <link rel="stylesheet" href="{% static 'css/output.css' %}">
 </head>
 
-<body class="bg-slate-100 min-h-screen">
+<body class="min-h-screen bg-slate-50 text-slate-900 antialiased">
+    {% include "crime/navbar.html" %}
 
-    <header class="bg-slate-900 text-white">
-        <div class="max-w-7xl mx-auto px-6 py-5">
-            <h1 class="text-2xl font-bold">
-                AI Crime Report Analyzer
-            </h1>
-        </div>
-    </header>
-
-
-    <main class="max-w-3xl mx-auto px-6 py-10">
-
-        <div class="bg-white rounded-xl shadow-md p-8">
-
-            <h2 class="text-3xl font-bold text-slate-900 mb-2">
-                Submit Crime Report
-            </h2>
-
-            <p class="text-slate-600 mb-8">
-                Enter the details of the crime report for analysis.
+    <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+        <section class="mb-8">
+            <p class="text-xs font-bold uppercase tracking-[0.18em] text-cyan-700">Report intake</p>
+            <h1 class="mt-2 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Start a new analysis</h1>
+            <p class="mt-3 max-w-2xl text-base leading-7 text-slate-600">
+                Add the key incident details below to create a clear, review-ready crime report.
             </p>
+        </section>
 
-
-            <form method="POST">
-
-                {% csrf_token %}
-
-
-                <!-- Crime Title -->
-                <div class="mb-5">
-
-                    <label class="block text-sm font-semibold text-slate-700 mb-2">
-                        Crime Title
-                    </label>
-
-                    <input
-                        type="text"
-                        name="title"
-                        required
-                        class="w-full border border-slate-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-slate-500"
-                        placeholder="e.g. Mobile Theft"
-                    >
-
+        <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(17rem,0.75fr)]">
+            <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div class="border-b border-slate-100 px-6 py-5 sm:px-8">
+                    <h2 class="text-lg font-bold text-slate-900">Incident details</h2>
+                    <p class="mt-1 text-sm text-slate-500">Fields marked required must be completed.</p>
                 </div>
 
+                <form method="POST" class="space-y-5 p-6 sm:p-8">
+                    {% csrf_token %}
 
-                <!-- Crime Description -->
-                <div class="mb-5">
+                    <div>
+                        <label for="title" class="mb-2 block text-sm font-semibold text-slate-700">Crime title</label>
+                        <input
+                            id="title"
+                            type="text"
+                            name="title"
+                            required
+                            class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
+                            placeholder="e.g. Mobile theft"
+                        >
+                    </div>
 
-                    <label class="block text-sm font-semibold text-slate-700 mb-2">
-                        Crime Description
-                    </label>
+                    <div>
+                        <label for="description" class="mb-2 block text-sm font-semibold text-slate-700">Crime description</label>
+                        <textarea
+                            id="description"
+                            name="description"
+                            rows="6"
+                            required
+                            class="w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
+                            placeholder="Describe what happened, including any relevant details..."
+                        ></textarea>
+                    </div>
 
-                    <textarea
-                        name="description"
-                        rows="6"
-                        required
-                        class="w-full border border-slate-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-slate-500"
-                        placeholder="Describe the crime incident in detail..."
-                    ></textarea>
+                    <div class="grid gap-5 sm:grid-cols-2">
+                        <div>
+                            <label for="location" class="mb-2 block text-sm font-semibold text-slate-700">Location</label>
+                            <input
+                                id="location"
+                                type="text"
+                                name="location"
+                                required
+                                class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
+                                placeholder="e.g. Mumbai"
+                            >
+                        </div>
 
+                        <div>
+                            <label for="date_reported" class="mb-2 block text-sm font-semibold text-slate-700">Date reported</label>
+                            <input
+                                id="date_reported"
+                                type="date"
+                                name="date_reported"
+                                required
+                                class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-100 pt-5">
+                        <button
+                            type="submit"
+                            class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3.5 font-semibold text-white shadow-lg shadow-slate-300 transition hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-300 sm:w-auto"
+                        >
+                            Submit report
+                            <svg aria-hidden="true" class="size-4" viewBox="0 0 24 24" fill="none">
+                                <path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <aside class="rounded-2xl bg-slate-950 p-6 text-white shadow-lg shadow-slate-300 sm:p-7">
+                <p class="text-xs font-bold uppercase tracking-[0.18em] text-cyan-300">Helpful tips</p>
+                <h2 class="mt-3 text-xl font-bold tracking-tight">For a clearer report</h2>
+                <p class="mt-2 text-sm leading-6 text-slate-400">
+                    A few precise details make reports easier to review.
+                </p>
+
+                <ul class="mt-6 space-y-5">
+                    <li class="flex gap-3">
+                        <span class="grid size-8 shrink-0 place-items-center rounded-lg bg-white/10 text-xs font-bold text-cyan-200">01</span>
+                        <div>
+                            <h3 class="text-sm font-semibold">Use a clear title</h3>
+                            <p class="mt-1 text-sm leading-5 text-slate-400">Summarize the incident in a few words.</p>
+                        </div>
+                    </li>
+                    <li class="flex gap-3">
+                        <span class="grid size-8 shrink-0 place-items-center rounded-lg bg-white/10 text-xs font-bold text-indigo-200">02</span>
+                        <div>
+                            <h3 class="text-sm font-semibold">Include relevant details</h3>
+                            <p class="mt-1 text-sm leading-5 text-slate-400">Describe the event clearly and factually.</p>
+                        </div>
+                    </li>
+                    <li class="flex gap-3">
+                        <span class="grid size-8 shrink-0 place-items-center rounded-lg bg-white/10 text-xs font-bold text-emerald-200">03</span>
+                        <div>
+                            <h3 class="text-sm font-semibold">Check date and location</h3>
+                            <p class="mt-1 text-sm leading-5 text-slate-400">Confirm these details before submitting.</p>
+                        </div>
+                    </li>
+                </ul>
+
+                <div class="mt-7 rounded-xl border border-white/10 bg-white/[0.06] p-4">
+                    <p class="text-sm font-semibold text-slate-200">Keep it factual</p>
+                    <p class="mt-1 text-sm leading-5 text-slate-400">Only include information relevant to the incident.</p>
                 </div>
-
-
-                <!-- Location -->
-                <div class="mb-5">
-
-                    <label class="block text-sm font-semibold text-slate-700 mb-2">
-                        Location
-                    </label>
-
-                    <input
-                        type="text"
-                        name="location"
-                        required
-                        class="w-full border border-slate-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-slate-500"
-                        placeholder="e.g. Mumbai"
-                    >
-
-                </div>
-
-
-                <!-- Date Reported -->
-                <div class="mb-7">
-
-                    <label class="block text-sm font-semibold text-slate-700 mb-2">
-                        Date Reported
-                    </label>
-
-                    <input
-                        type="date"
-                        name="date_reported"
-                        required
-                        class="w-full border border-slate-300 rounded-lg px-4 py-3"
-                    >
-
-                </div>
-
-
-                <!-- Submit -->
-                <button
-                    type="submit"
-                    class="w-full bg-slate-900 text-white py-3 rounded-lg font-semibold hover:bg-slate-700 transition"
-                >
-                    Submit Report
-                </button>
-
-            </form>
-
+            </aside>
         </div>
-
     </main>
-
 </body>
 </html>

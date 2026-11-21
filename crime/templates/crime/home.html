@@ -1,4 +1,3 @@
-
 {% load static %}
 
 <!DOCTYPE html>
@@ -6,118 +5,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>AI Crime Report Analyzer</title>
-
     <link rel="stylesheet" href="{% static 'css/output.css' %}">
 </head>
 
-<body class="bg-slate-100 min-h-screen">
+<body class="min-h-screen bg-slate-50 text-slate-900 antialiased">
+    {% include "crime/navbar.html" %}
 
-    <!-- Header -->
-    <header class="bg-slate-900 text-white">
-        <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
-
-            <h1 class="text-2xl font-bold">
-                AI Crime Report Analyzer
-            </h1>
-
-            <nav class="space-x-6">
-                <a href="{% url 'home' %}" class="hover:text-slate-300">
-                    Home
-                </a>
-
-                <a href="#" class="hover:text-slate-300">
-                    Reports
-                </a>
-
-                <a href="#" class="hover:text-slate-300">
-                    Cases
-                </a>
-            </nav>
-
-        </div>
-    </header>
-
-
-    <!-- Hero Section -->
     <main>
+        <section class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+            <div class="relative isolate overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 px-6 py-10 text-white shadow-2xl shadow-slate-300 sm:px-10 lg:px-14 lg:py-14">
+                <div aria-hidden="true" class="absolute -right-20 -top-24 -z-10 size-80 rounded-full bg-cyan-400/20 blur-3xl"></div>
+                <div class="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+                    <div>
+                        <p class="mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-cyan-200">
+                            <span class="size-2 rounded-full bg-cyan-300"></span>
+                            Smart crime reporting
+                        </p>
+                        <h1 class="max-w-2xl text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+                            Turn reports into
+                            <span class="text-cyan-300">clearer insight.</span>
+                        </h1>
+                        <p class="mt-5 max-w-xl text-base leading-7 text-slate-300 sm:text-lg">
+                            Organize incident details, analyze crime reports, and explore similar cases from one workspace.
+                        </p>
+                        <div class="mt-8 flex flex-wrap items-center gap-4">
+                            <a href="{% url 'report_form' %}" class="inline-flex items-center gap-2 rounded-xl bg-cyan-300 px-5 py-3 font-semibold text-slate-950 shadow-lg shadow-cyan-950/30 transition hover:bg-cyan-200 focus:outline-none focus:ring-4 focus:ring-cyan-200/40">
+                                Start a report
+                                <svg aria-hidden="true" class="size-4" viewBox="0 0 24 24" fill="none">
+                                    <path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </a>
+                            <a href="#how-it-works" class="rounded-xl px-3 py-3 text-sm font-semibold text-slate-300 transition hover:text-white">
+                                See how it works
+                            </a>
+                        </div>
+                    </div>
 
-        <section class="max-w-7xl mx-auto px-6 py-20">
-
-            <div class="max-w-3xl">
-
-                <p class="text-slate-600 font-semibold mb-3">
-                    AI-Powered Crime Analysis
-                </p>
-
-                <h2 class="text-5xl font-bold text-slate-900 leading-tight mb-6">
-                    Analyze Crime Reports
-                    <br>
-                    Find Similar Cases
-                </h2>
-
-                <p class="text-lg text-slate-600 mb-8">
-                    Analyze crime reports using AI and identify similar
-                    previous cases to support investigation and case analysis.
-                </p>
-
-                <!-- Analyze Crime Report Button -->
-                <a href="{% url 'report_form' %}"
-                   class="inline-block bg-slate-900 text-white px-6 py-3 rounded-lg font-semibold hover:bg-slate-700 transition">
-                    Analyze Crime Report
-                </a>
-
+                    <div class="rounded-2xl border border-white/10 bg-white/[0.06] p-5 shadow-xl backdrop-blur sm:p-7">
+                        <div class="flex items-center justify-between border-b border-white/10 pb-4">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-200">Analysis workflow</p>
+                                <p class="mt-1 text-sm text-slate-400">From report to review</p>
+                            </div>
+                            <span class="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-slate-300">3 steps</span>
+                        </div>
+                        <ol class="mt-5 space-y-4">
+                            <li class="flex gap-4">
+                                <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-cyan-300/15 text-sm font-bold text-cyan-200">01</span>
+                                <div>
+                                    <h2 class="font-semibold text-white">Capture the details</h2>
+                                    <p class="mt-1 text-sm leading-6 text-slate-400">Record the incident, location, and date in a clear format.</p>
+                                </div>
+                            </li>
+                            <li class="flex gap-4">
+                                <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-indigo-300/15 text-sm font-bold text-indigo-200">02</span>
+                                <div>
+                                    <h2 class="font-semibold text-white">Review the report</h2>
+                                    <p class="mt-1 text-sm leading-6 text-slate-400">Keep important information together for further analysis.</p>
+                                </div>
+                            </li>
+                            <li class="flex gap-4">
+                                <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-emerald-300/15 text-sm font-bold text-emerald-200">03</span>
+                                <div>
+                                    <h2 class="font-semibold text-white">Explore related cases</h2>
+                                    <p class="mt-1 text-sm leading-6 text-slate-400">Use report details to support case comparison.</p>
+                                </div>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
             </div>
-
         </section>
 
-
-        <!-- Features -->
-        <section class="max-w-7xl mx-auto px-6 pb-20">
-
-            <div class="grid md:grid-cols-3 gap-6">
-
-                <div class="bg-white rounded-xl shadow-md p-6">
-                    <h3 class="text-xl font-bold text-slate-900 mb-3">
-                        Crime Reports
-                    </h3>
-
-                    <p class="text-slate-600">
-                        Submit and store important crime report details
-                        securely for further analysis.
-                    </p>
+        <section id="how-it-works" class="mx-auto max-w-7xl px-4 pb-14 sm:px-6 lg:px-8 lg:pb-20">
+            <div class="mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-[0.18em] text-cyan-700">A clearer workflow</p>
+                    <h2 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Tools for focused analysis</h2>
                 </div>
-
-
-                <div class="bg-white rounded-xl shadow-md p-6">
-                    <h3 class="text-xl font-bold text-slate-900 mb-3">
-                        AI Analysis
-                    </h3>
-
-                    <p class="text-slate-600">
-                        Use a pre-trained AI model to analyze the
-                        submitted crime report.
-                    </p>
-                </div>
-
-
-                <div class="bg-white rounded-xl shadow-md p-6">
-                    <h3 class="text-xl font-bold text-slate-900 mb-3">
-                        Similar Cases
-                    </h3>
-
-                    <p class="text-slate-600">
-                        Find previous cases with similar details to
-                        support investigation.
-                    </p>
-                </div>
-
+                <p class="max-w-lg text-sm leading-6 text-slate-600 sm:text-right">
+                    Keep information organized and make it easier to review each report.
+                </p>
             </div>
 
+            <div class="grid gap-4 md:grid-cols-3">
+                <article class="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-cyan-200 hover:shadow-lg hover:shadow-slate-200/70">
+                    <span class="grid size-11 place-items-center rounded-xl bg-cyan-50 text-sm font-bold text-cyan-800">01</span>
+                    <h3 class="mt-5 text-lg font-bold text-slate-900">Crime reports</h3>
+                    <p class="mt-2 text-sm leading-6 text-slate-600">Submit and store important incident details for further analysis.</p>
+                </article>
+                <article class="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-indigo-200 hover:shadow-lg hover:shadow-slate-200/70">
+                    <span class="grid size-11 place-items-center rounded-xl bg-indigo-50 text-sm font-bold text-indigo-800">02</span>
+                    <h3 class="mt-5 text-lg font-bold text-slate-900">AI analysis</h3>
+                    <p class="mt-2 text-sm leading-6 text-slate-600">Review submitted reports with analysis tools in one workspace.</p>
+                </article>
+                <article class="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-emerald-200 hover:shadow-lg hover:shadow-slate-200/70">
+                    <span class="grid size-11 place-items-center rounded-xl bg-emerald-50 text-sm font-bold text-emerald-800">03</span>
+                    <h3 class="mt-5 text-lg font-bold text-slate-900">Similar cases</h3>
+                    <p class="mt-2 text-sm leading-6 text-slate-600">Compare related case details to support investigation and review.</p>
+                </article>
+            </div>
         </section>
-
     </main>
-
 </body>
 </html>

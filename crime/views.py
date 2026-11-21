@@ -2,13 +2,6 @@ from django.shortcuts import render, redirect
 from .models import CrimeReport
 from django.conf import settings
 def home(request):
-    import pandas as pd
-
-    df = pd.read_csv(str(settings.BASE_DIR)+"/crime_dataset_india.csv")
-
-    print(df.head())
-    print("Total records:", len(df))
-
     return render(request, 'crime/home.html')
 
 

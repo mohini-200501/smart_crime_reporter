@@ -42,38 +42,15 @@
                         </div>
                     </div>
 
-                    <div class="rounded-2xl border border-white/10 bg-white/[0.06] p-5 shadow-xl backdrop-blur sm:p-7">
-                        <div class="flex items-center justify-between border-b border-white/10 pb-4">
-                            <div>
-                                <p class="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-200">Analysis workflow</p>
-                                <p class="mt-1 text-sm text-slate-400">From report to review</p>
-                            </div>
-                            <span class="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-slate-300">3 steps</span>
-                        </div>
-                        <ol class="mt-5 space-y-4">
-                            <li class="flex gap-4">
-                                <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-cyan-300/15 text-sm font-bold text-cyan-200">01</span>
-                                <div>
-                                    <h2 class="font-semibold text-white">Capture the details</h2>
-                                    <p class="mt-1 text-sm leading-6 text-slate-400">Record the incident, location, and date in a clear format.</p>
-                                </div>
-                            </li>
-                            <li class="flex gap-4">
-                                <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-indigo-300/15 text-sm font-bold text-indigo-200">02</span>
-                                <div>
-                                    <h2 class="font-semibold text-white">Review the report</h2>
-                                    <p class="mt-1 text-sm leading-6 text-slate-400">Keep important information together for further analysis.</p>
-                                </div>
-                            </li>
-                            <li class="flex gap-4">
-                                <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-emerald-300/15 text-sm font-bold text-emerald-200">03</span>
-                                <div>
-                                    <h2 class="font-semibold text-white">Explore related cases</h2>
-                                    <p class="mt-1 text-sm leading-6 text-slate-400">Use report details to support case comparison.</p>
-                                </div>
-                            </li>
-                        </ol>
-                    </div>
+                    <figure class="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] p-3 shadow-xl backdrop-blur sm:p-5">
+                        <img
+                            src="{% static 'images/report-insight.svg' %}"
+                            alt="Illustration of a crime report, location pin, and incident data chart"
+                            class="h-auto w-full rounded-xl"
+                            width="640"
+                            height="480"
+                        >
+                    </figure>
                 </div>
             </div>
         </section>

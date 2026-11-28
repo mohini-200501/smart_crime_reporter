@@ -1,0 +1,65 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crime Report Analysis</title>
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+    <script src="{% static 'js/markdown_viewer.js' %}" defer></script>
+    <script src="{% static 'js/analysis_loading.js' %}" defer></script>
+</head>
+
+<body class="min-h-screen bg-slate-50 text-slate-900 antialiased">
+    {% include "crime/navbar.html" %}
+
+    <main class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+        <p class="text-xs font-bold uppercase tracking-[0.18em] text-cyan-700">Report submitted</p>
+        <h1 class="mt-2 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Incident analysis</h1>
+        <p class="mt-3 text-base leading-7 text-slate-600">Gemini-generated review of the submitted incident details.</p>
+
+        <section class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+            <h2 class="text-xl font-bold text-slate-950">{{ report.title }}</h2>
+            <dl class="mt-4 grid gap-4 border-b border-slate-100 pb-6 text-sm sm:grid-cols-2">
+                <div>
+                    <dt class="font-semibold text-slate-500">Location</dt>
+                    <dd class="mt-1 text-slate-800">{{ report.location }}</dd>
+                </div>
+                <div>
+                    <dt class="font-semibold text-slate-500">Date reported</dt>
+                    <dd class="mt-1 text-slate-800">{{ report.date_reported|date:"M j, Y" }}</dd>
+                </div>
+                <div class="sm:col-span-2">
+                    <dt class="font-semibold text-slate-500">Description</dt>
+                    <dd class="mt-1 whitespace-pre-line leading-6 text-slate-800">{{ report.description }}</dd>
+                </div>
+            </dl>
+
+            <h2 class="mt-6 text-lg font-bold text-slate-950">Gemini analysis</h2>
+            {% if analysis_error %}
+                <p role="status" class="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">{{ analysis_error }}</p>
+            {% else %}
+                <div data-markdown-viewer class="mt-3 whitespace-pre-line rounded-xl bg-slate-50 p-5 text-sm leading-7 text-slate-700">{{ analysis }}</div>
+                <p class="mt-4 text-xs leading-5 text-slate-500">AI-generated content may be inaccurate. Verify details independently; this analysis is not a legal conclusion.</p>
+            {% endif %}
+            <h2>Hello</h2>
+
+            <form method="post" action="{% url 'report_detail' slug=report.get_url_slug %}" class="mt-6" data-analysis-form>
+                {% csrf_token %}
+                <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-300 disabled:cursor-wait disabled:opacity-70">
+                    Analyze report
+                </button>
+                <p data-analysis-status role="status" aria-live="polite" class="mt-3 hidden text-sm text-slate-600">
+                    Analyzing your report. This can take up to 30 seconds.
+                </p>
+            </form>
+        </section>
+
+        <div class="mt-6 flex flex-wrap gap-3">
+            <a href="{% url 'report_form' %}" class="inline-flex items-center rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">Submit another report</a>
+            <a href="{% url 'reports' %}" class="inline-flex items-center rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">View reports</a>
+        </div>
+    </main>
+</body>
+</html>

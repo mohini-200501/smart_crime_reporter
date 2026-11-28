@@ -37,6 +37,7 @@
                             id="title"
                             type="text"
                             name="title"
+                            value="{{ form_data.title|default:'' }}"
                             required
                             class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
                             placeholder="e.g. Mobile theft"
@@ -52,7 +53,7 @@
                             required
                             class="w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
                             placeholder="Describe what happened, including any relevant details..."
-                        ></textarea>
+                        >{{ form_data.description|default:'' }}</textarea>
                     </div>
 
                     <div class="grid gap-5 sm:grid-cols-2">
@@ -62,6 +63,7 @@
                                 id="location"
                                 type="text"
                                 name="location"
+                                value="{{ form_data.location|default:'' }}"
                                 required
                                 class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
                                 placeholder="e.g. Mumbai"
@@ -74,9 +76,14 @@
                                 id="date_reported"
                                 type="date"
                                 name="date_reported"
+                                value="{{ form_data.date_reported|default:'' }}"
+                                max="{% now 'Y-m-d' %}"
                                 required
                                 class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
                             >
+                            {% if date_error %}
+                                <p id="date_reported_error" role="alert" class="mt-2 text-sm text-red-700">{{ date_error }}</p>
+                            {% endif %}
                         </div>
                     </div>
 

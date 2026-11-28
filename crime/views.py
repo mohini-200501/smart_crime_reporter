@@ -6,6 +6,8 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.shortcuts import render
+from django.utils import timezone
 from .models import CrimeReport
 
 
@@ -124,12 +126,29 @@ def report_form(request):
         description = request.POST.get('description', '').strip()
         location = request.POST.get('location', '').strip()
         date_reported = request.POST.get('date_reported', '').strip()
+        try:
+            parsed_date_reported = datetime.strptime(
+                date_reported, '%Y-%m-%d'
+            )
+        except ValueError:
+            return render(request, 'crime/report_form.html', {
+                'form_data': request.POST,
+                'date_error': 'Enter a valid date.',
+            })
+
+        if parsed_date_reported.date() > timezone.localdate():
+            return render(request, 'crime/report_form.html', {
+                'form_data': request.POST,
+                'date_error': 'Date reported cannot be in the future.',
+            })
+
+        parsed_date_reported = timezone.make_aware(parsed_date_reported)
 
         report = CrimeReport.objects.create(
             title=title,
             description=description,
             location=location,
-            date_reported=date_reported
+            date_reported=parsed_date_reported
         )
 
         return redirect('report_detail', slug=report.get_url_slug())

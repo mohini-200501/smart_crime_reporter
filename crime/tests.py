@@ -1,10 +1,12 @@
-from unittest.mock import patch
+import os
+from datetime import timedelta
+from unittest.mock import MagicMock, patch
 
 from django.test import TestCase
 from django.utils import timezone
 
 from .models import CrimeReport
-from .views import GeminiAPIError
+from .views import GeminiAPIError, generate_crime_analysis
 
 
 class ReportsViewTests(TestCase):
@@ -62,6 +64,37 @@ class ReportsViewTests(TestCase):
 
 
 class ReportFormGeminiTests(TestCase):
+    def test_generate_analysis_uses_standard_gemini_api_key(self):
+        response = MagicMock()
+        response.__enter__.return_value.read.return_value = (
+            b'{"candidates":[{"content":{"parts":[{"text":"Review summary"}]}}]}'
+        )
+
+        with patch.dict(os.environ, {'GEMINI_API_KEY': 'test-key'}, clear=True):
+            with patch('crime.views.urlopen', return_value=response) as urlopen:
+                analysis = generate_crime_analysis(
+                    'Theft', 'Phone stolen.', 'Mumbai', '2026-11-26'
+                )
+
+        request = urlopen.call_args.args[0]
+        self.assertEqual(request.get_header('X-goog-api-key'), 'test-key')
+        self.assertEqual(analysis, 'Review summary')
+
+    def test_future_reported_date_is_rejected(self):
+        future_date = (timezone.localdate() + timedelta(days=1)).isoformat()
+
+        response = self.client.post('/report/', {
+            'title': 'Theft',
+            'description': 'A phone was stolen.',
+            'location': 'Mumbai',
+            'date_reported': future_date,
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Date reported cannot be in the future.')
+        self.assertContains(response, f'max="{timezone.localdate().isoformat()}"')
+        self.assertEqual(CrimeReport.objects.count(), 0)
+
     def test_post_saves_report_and_displays_gemini_analysis(self):
         with patch(
             'crime.views.generate_crime_analysis',
@@ -76,6 +109,7 @@ class ReportFormGeminiTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Review summary')
+        self.assertContains(response, 'Nov 26, 2026')
         self.assertEqual(CrimeReport.objects.count(), 1)
         analyze.assert_called_once_with(
             'Theft', 'A phone was stolen.', 'Mumbai', '2026-11-26'

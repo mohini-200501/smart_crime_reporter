@@ -1,12 +1,14 @@
 import json
 import logging
 import os
+from datetime import datetime
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
-from django.shortcuts import render
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.shortcuts import render
+from django.utils import timezone
 from .models import CrimeReport
 
 
@@ -18,7 +20,7 @@ class GeminiAPIError(Exception):
 
 
 def generate_crime_analysis(title, description, location, date_reported):
-    api_key = os.getenv('GEMIINI_API_KEY')
+    api_key = os.getenv('GEMINI_API_KEY') or os.getenv('GEMIINI_API_KEY')
     if not api_key:
         raise GeminiAPIError('The Gemini API key is not configured.')
 
@@ -147,12 +149,29 @@ def report_form(request):
         description = request.POST.get('description', '').strip()
         location = request.POST.get('location', '').strip()
         date_reported = request.POST.get('date_reported', '').strip()
+        try:
+            parsed_date_reported = datetime.strptime(
+                date_reported, '%Y-%m-%d'
+            )
+        except ValueError:
+            return render(request, 'crime/report_form.html', {
+                'form_data': request.POST,
+                'date_error': 'Enter a valid date.',
+            })
+
+        if parsed_date_reported.date() > timezone.localdate():
+            return render(request, 'crime/report_form.html', {
+                'form_data': request.POST,
+                'date_error': 'Date reported cannot be in the future.',
+            })
+
+        parsed_date_reported = timezone.make_aware(parsed_date_reported)
 
         report = CrimeReport.objects.create(
             title=title,
             description=description,
             location=location,
-            date_reported=date_reported
+            date_reported=parsed_date_reported
         )
 
         try:
@@ -164,8 +183,8 @@ def report_form(request):
             logger.warning('Crime analysis unavailable: %s', error)
             analysis = None
             analysis_error = (
-                'Your report was saved, but Gemini could not analyze it '
-                'right now. Please try again later.'
+                'Your report was saved, but Gemini could not analyze it: '
+                f'{error}'
             )
 
         return render(request, 'crime/report_analysis.html', {

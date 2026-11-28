@@ -1,7 +1,6 @@
 from django.db import models
+from django.utils.text import slugify
 
-# Create your models here.
-from django.db import models
 
 
 class CrimeReport(models.Model):
@@ -9,6 +8,7 @@ class CrimeReport(models.Model):
     description = models.TextField()
     location = models.CharField(max_length=200)
     date_reported = models.DateTimeField()
+    analysis = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     report_number = models.IntegerField(blank=True, null=True)
@@ -24,6 +24,9 @@ class CrimeReport(models.Model):
     police_deployed = models.IntegerField(blank=True, null=True)
     case_closed = models.BooleanField(blank=True, null=True)
     date_case_closed = models.DateTimeField(blank=True, null=True)
+
+    def get_url_slug(self):
+        return f'{slugify(self.title) or "report"}-{self.pk}'
 
     def __str__(self):
         return self.title

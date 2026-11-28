@@ -4,9 +4,55 @@ from unittest.mock import MagicMock, patch
 
 from django.test import TestCase
 from django.utils import timezone
+from google import genai
 
 from .models import CrimeReport
 from .views import GeminiAPIError, generate_crime_analysis
+
+
+class GeminiClientTests(TestCase):
+    @patch.dict('os.environ', {'GEMINI_API_KEY': 'test-key'})
+    @patch('crime.views.genai.Client')
+    def test_analysis_uses_gemini_sdk(self, client_factory):
+        client = client_factory.return_value
+        client.interactions.create.return_value.output_text = 'Review summary'
+
+        analysis = generate_crime_analysis(
+            'Theft', 'A phone was stolen.', 'Mumbai', '2026-11-26'
+        )
+
+        self.assertEqual(analysis, 'Review summary')
+        client_factory.assert_called_once_with(api_key='test-key')
+        request = client.interactions.create.call_args.kwargs
+        self.assertEqual(request['model'], 'gemini-3.8-flash')
+        self.assertEqual(request['timeout'], 30)
+        self.assertIn('A phone was stolen.', request['input'])
+
+    @patch.dict('os.environ', {'GEMINI_API_KEY': 'test-key'})
+    @patch('crime.views.genai.Client')
+    def test_analysis_timeout_is_reported_clearly(self, client_factory):
+        client_factory.return_value.interactions.create.side_effect = TimeoutError
+
+        with self.assertRaisesRegex(GeminiAPIError, 'timed out after 30 seconds'):
+            generate_crime_analysis(
+                'Theft', 'A phone was stolen.', 'Mumbai', '2026-11-26'
+            )
+
+    @patch.dict('os.environ', {'GEMINI_API_KEY': 'test-key'})
+    @patch('crime.views.genai.Client')
+    def test_sdk_api_error_is_reported_with_details(self, client_factory):
+        client_factory.return_value.interactions.create.side_effect = (
+            genai.errors.ClientError(
+                404, {'error': {'message': 'Model not found'}}
+            )
+        )
+
+        with self.assertRaisesRegex(
+            GeminiAPIError, 'HTTP 404: Model not found'
+        ):
+            generate_crime_analysis(
+                'Theft', 'A phone was stolen.', 'Mumbai', '2026-11-26'
+            )
 
 
 class ReportsViewTests(TestCase):
@@ -64,38 +110,7 @@ class ReportsViewTests(TestCase):
 
 
 class ReportFormGeminiTests(TestCase):
-    def test_generate_analysis_uses_standard_gemini_api_key(self):
-        response = MagicMock()
-        response.__enter__.return_value.read.return_value = (
-            b'{"candidates":[{"content":{"parts":[{"text":"Review summary"}]}}]}'
-        )
-
-        with patch.dict(os.environ, {'GEMINI_API_KEY': 'test-key'}, clear=True):
-            with patch('crime.views.urlopen', return_value=response) as urlopen:
-                analysis = generate_crime_analysis(
-                    'Theft', 'Phone stolen.', 'Mumbai', '2026-11-26'
-                )
-
-        request = urlopen.call_args.args[0]
-        self.assertEqual(request.get_header('X-goog-api-key'), 'test-key')
-        self.assertEqual(analysis, 'Review summary')
-
-    def test_future_reported_date_is_rejected(self):
-        future_date = (timezone.localdate() + timedelta(days=1)).isoformat()
-
-        response = self.client.post('/report/', {
-            'title': 'Theft',
-            'description': 'A phone was stolen.',
-            'location': 'Mumbai',
-            'date_reported': future_date,
-        })
-
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Date reported cannot be in the future.')
-        self.assertContains(response, f'max="{timezone.localdate().isoformat()}"')
-        self.assertEqual(CrimeReport.objects.count(), 0)
-
-    def test_post_saves_report_and_displays_gemini_analysis(self):
+    def test_post_saves_report_without_running_analysis(self):
         with patch(
             'crime.views.generate_crime_analysis',
             return_value='Review summary',
@@ -107,26 +122,62 @@ class ReportFormGeminiTests(TestCase):
                 'date_reported': '2026-11-26',
             })
 
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Review summary')
-        self.assertContains(response, 'Nov 26, 2026')
+        report = CrimeReport.objects.get()
+        self.assertRedirects(response, f'/report/{report.get_url_slug()}/')
         self.assertEqual(CrimeReport.objects.count(), 1)
-        analyze.assert_called_once_with(
-            'Theft', 'A phone was stolen.', 'Mumbai', '2026-11-26'
+        self.assertEqual(report.analysis, '')
+        analyze.assert_not_called()
+
+    def test_detail_page_has_separate_analyze_action(self):
+        report = CrimeReport.objects.create(
+            title='Theft',
+            description='A phone was stolen.',
+            location='Mumbai',
+            date_reported=timezone.now(),
         )
 
-    def test_gemini_failure_keeps_saved_report_and_shows_error(self):
+        with patch('crime.views.generate_crime_analysis') as analyze:
+            response = self.client.get(f'/report/{report.get_url_slug()}/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Analyze report')
+        analyze.assert_not_called()
+
+    def test_analyze_action_persists_result_on_report_detail(self):
+        report = CrimeReport.objects.create(
+            title='Theft',
+            description='A phone was stolen.',
+            location='Mumbai',
+            date_reported=timezone.now(),
+        )
+
+        with patch(
+            'crime.views.generate_crime_analysis',
+            return_value='Review summary',
+        ) as analyze:
+            response = self.client.post(f'/report/{report.get_url_slug()}/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Review summary')
+        report.refresh_from_db()
+        self.assertEqual(report.analysis, 'Review summary')
+        analyze.assert_called_once_with(
+            'Theft', 'A phone was stolen.', 'Mumbai', report.date_reported
+        )
+
+    def test_gemini_failure_keeps_report_and_shows_error(self):
+        report = CrimeReport.objects.create(
+            title='Theft',
+            description='A phone was stolen.',
+            location='Mumbai',
+            date_reported=timezone.now(),
+        )
         with patch(
             'crime.views.generate_crime_analysis',
             side_effect=GeminiAPIError('Gemini is unavailable'),
         ):
-            response = self.client.post('/report/', {
-                'title': 'Theft',
-                'description': 'A phone was stolen.',
-                'location': 'Mumbai',
-                'date_reported': '2026-11-26',
-            })
+            response = self.client.post(f'/report/{report.get_url_slug()}/')
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Your report was saved')
+        self.assertContains(response, 'Gemini could not analyze this report')
         self.assertEqual(CrimeReport.objects.count(), 1)

@@ -85,7 +85,9 @@
                         <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                             <div class="min-w-0">
                                 <div class="flex flex-wrap items-center gap-2">
-                                    <h2 class="text-lg font-bold text-slate-950">{{ report.title }}</h2>
+                                    <h2 class="text-lg font-bold text-slate-950">
+                                        <a href="{% url 'report_detail' slug=report.get_url_slug %}" class="hover:text-cyan-700">{{ report.title }}</a>
+                                    </h2>
                                     {% if report.case_closed is True %}
                                         <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">Closed</span>
                                     {% elif report.case_closed is False %}

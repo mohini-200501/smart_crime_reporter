@@ -1,10 +1,9 @@
-import json
 import logging
 import os
-from datetime import datetime
-from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
 
+from google import genai
+from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect, render
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render
@@ -13,6 +12,7 @@ from .models import CrimeReport
 
 
 logger = logging.getLogger(__name__)
+ANALYSIS_TIMEOUT_SECONDS = 30
 
 
 class GeminiAPIError(Exception):
@@ -20,7 +20,7 @@ class GeminiAPIError(Exception):
 
 
 def generate_crime_analysis(title, description, location, date_reported):
-    api_key = os.getenv('GEMINI_API_KEY') or os.getenv('GEMIINI_API_KEY')
+    api_key = os.getenv('GEMINI_API_KEY')
     if not api_key:
         raise GeminiAPIError('The Gemini API key is not configured.')
 
@@ -35,52 +35,29 @@ def generate_crime_analysis(title, description, location, date_reported):
         f'Location: {location}\n'
         f'Date reported: {date_reported}'
     )
-    request = Request(
-        'https://generativelanguage.googleapis.com/v1beta/models/'
-        'gemini-2.5-flash:generateContent',
-        data=json.dumps({
-            'contents': [{'parts': [{'text': prompt}]}],
-            'generationConfig': {'temperature': 0.2},
-        }).encode('utf-8'),
-        headers={
-            'Content-Type': 'application/json',
-            'x-goog-api-key': api_key,
-        },
-        method='POST',
-    )
 
     try:
-        with urlopen(request, timeout=30) as response:
-            result = json.loads(response.read())
-    except HTTPError as error:
+        client = genai.Client(api_key=api_key)
+        interaction = client.interactions.create(
+            model='gemini-3.8-flash',
+            input=prompt,
+            timeout=ANALYSIS_TIMEOUT_SECONDS,
+        )
+    except TimeoutError as error:
         raise GeminiAPIError(
-            f'Gemini returned HTTP status {error.code}.'
+            'Gemini analysis timed out after '
+            f'{ANALYSIS_TIMEOUT_SECONDS} seconds. Please try again.'
         ) from error
-    except (URLError, TimeoutError) as error:
-        raise GeminiAPIError('Gemini could not be reached.') from error
-    except (json.JSONDecodeError, UnicodeDecodeError) as error:
-        raise GeminiAPIError('Gemini returned an invalid response.') from error
+    except genai.errors.APIError as error:
+        raise GeminiAPIError(
+            f'Gemini API returned HTTP {error.code}: '
+            f'{error.message or "Unknown API error."}'
+        ) from error
 
-    if not isinstance(result, dict):
-        raise GeminiAPIError('Gemini returned an invalid response.')
-
-    candidates = result.get('candidates')
-    if not isinstance(candidates, list) or not candidates:
-        raise GeminiAPIError('Gemini did not return an analysis.')
-
-    candidate = candidates[0]
-    content = candidate.get('content') if isinstance(candidate, dict) else None
-    parts = content.get('parts') if isinstance(content, dict) else None
-    if not isinstance(parts, list):
-        raise GeminiAPIError('Gemini returned an invalid response.')
-
-    analysis = '\n'.join(
-        part['text'] for part in parts
-        if isinstance(part, dict) and isinstance(part.get('text'), str)
-    ).strip()
-    if not analysis:
+    analysis = interaction.output_text
+    if not isinstance(analysis, str) or not analysis.strip():
         raise GeminiAPIError('Gemini returned an empty analysis.')
-    return analysis
+    return analysis.strip()
 
 
 def home(request):
@@ -174,23 +151,40 @@ def report_form(request):
             date_reported=parsed_date_reported
         )
 
-        try:
-            analysis = generate_crime_analysis(
-                title, description, location, date_reported
-            )
-            analysis_error = None
-        except GeminiAPIError as error:
-            logger.warning('Crime analysis unavailable: %s', error)
-            analysis = None
-            analysis_error = (
-                'Your report was saved, but Gemini could not analyze it: '
-                f'{error}'
-            )
-
-        return render(request, 'crime/report_analysis.html', {
-            'report': report,
-            'analysis': analysis,
-            'analysis_error': analysis_error,
-        })
+        return redirect('report_detail', slug=report.get_url_slug())
 
     return render(request, 'crime/report_form.html')
+
+
+def report_detail(request, slug):
+    try:
+        report_id = int(slug.rsplit('-', 1)[1])
+    except (IndexError, ValueError) as error:
+        raise Http404 from error
+
+    report = get_object_or_404(CrimeReport, pk=report_id)
+    if slug != report.get_url_slug():
+        return redirect('report_detail', slug=report.get_url_slug())
+
+    analysis_error = None
+
+    if request.method == 'POST':
+        try:
+            report.analysis = generate_crime_analysis(
+                report.title,
+                report.description,
+                report.location,
+                report.date_reported,
+            )
+            report.save(update_fields=['analysis'])
+        except GeminiAPIError as error:
+            logger.warning('Crime analysis unavailable: %s', error)
+            analysis_error = (
+                'Gemini could not analyze this report within 30 seconds or '
+                'is temporarily unavailable. Please try again.'
+            )
+
+    return render(request, 'crime/report_detail.html', {
+        'report': report,
+        'analysis_error': analysis_error,
+    })
